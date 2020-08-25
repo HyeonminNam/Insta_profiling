@@ -87,3 +87,6 @@ COOKIES_ENABLED = True
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+# 같은 주소 다시 request할 수 있도록 하는 옵션
+DUPEFILTER_CLASS = 'scrapy.dupefilters.BaseDupeFilter'
