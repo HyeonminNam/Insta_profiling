@@ -19,7 +19,11 @@ class Relation(scrapy.Spider):
     name = 'relation_spider_1'
 
     # 첫 기준 id(epoch 1)
-    user_id = '2094752163' # mumumu_yj
+    # 수도권: user_id = '2094752163' # mumumu_yj
+    # 전라: 
+    #########################################################
+    user_id = '8691537783' # gess_wat
+    #########################################################
 
     start_end_lst = []
     header = {}
@@ -147,13 +151,14 @@ class Relation2(scrapy.Spider):
 
     # 팔로워와 팔로우 목록을 추출할 user 정보(username, id)
 
+    ########################################################
     # epoch 1로 뽑아낸 id 리스트 활용
     try:
-        df = pd.read_csv('sd_1.csv')
+        df = pd.read_csv('jl_1.csv')
         user_id_lst = list(map(str, list(np.unique(df))))
     except:
         user_id_lst = []
-   
+   ##########################################################
 
     start_end_lst = []
     header = {}
@@ -221,7 +226,9 @@ class Relation2(scrapy.Spider):
             print('over 1000!')
             Relation2.over1000_lst.append(user_id)
             df_over1000 = pd.DataFrame(data = list(set(Relation2.over1000_lst)), columns = ['data'])
-            df_over1000.to_csv(r'D:\git\local\sd_over1000.csv')
+            ###################################################
+            df_over1000.to_csv(r'D:\git\local\jl_over1000.csv')
+            ###################################################
             return
         # follower_lst 추출
         follower_lst = follower_json['data']['user']['edge_followed_by']['edges']
@@ -229,7 +236,7 @@ class Relation2(scrapy.Spider):
         for follower in follower_lst:
             if not follower['node']['is_private']:
                 Relation2.start_end_lst.append([follower['node']['id'], user_id])
-                if len(Relation2.start_end_lst) == 100:
+                if len(Relation2.start_end_lst) >= 100:
                     follow_url = 'https://www.instagram.com/graphql/query/?query_hash=d04b0a864b4b54837c0d870b0e77e076&variables=%7B%22id%22%3A%22{}%22%2C%22first%22%3A24%7D'.format(user_id)
                     yield scrapy.Request(follow_url, callback=self.parse_follow, meta = {'user_id' : user_id})
             # 비공개 아이디는 어차피 필요없는 정보이기 때문에 제외하고 크롤링
@@ -265,7 +272,7 @@ class Relation2(scrapy.Spider):
         for follow in follow_lst:
             if not follow['node']['is_private']:
                 Relation2.start_end_lst.append([user_id, follow['node']['id']])
-                if len(Relation.start_end_lst) == 200:
+                if len(Relation2.start_end_lst) >= 200:
                     for start, end in Relation2.start_end_lst:
                         time.sleep(0.5)
                         yield {
