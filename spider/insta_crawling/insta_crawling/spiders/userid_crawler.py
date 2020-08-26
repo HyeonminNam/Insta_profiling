@@ -19,7 +19,11 @@ class Relation(scrapy.Spider):
     name = 'relation_spider_1'
 
     # 첫 기준 id(epoch 1)
-    user_id = '2094752163' # mumumu_yj
+    # 수도권: user_id = '2094752163' # mumumu_yj
+    # 전라: 
+    #########################################################
+    user_id = '8691537783' # gess_wat
+    #########################################################
 
     start_end_lst = []
     header = {}
@@ -147,13 +151,14 @@ class Relation2(scrapy.Spider):
 
     # 팔로워와 팔로우 목록을 추출할 user 정보(username, id)
 
+    ########################################################
     # epoch 1로 뽑아낸 id 리스트 활용
     try:
-        df = pd.read_csv('sd_1.csv')
+        df = pd.read_csv('jl_1.csv')
         user_id_lst = list(map(str, list(np.unique(df))))
     except:
         user_id_lst = []
-   
+   ##########################################################
 
     start_end_lst = []
     header = {}
@@ -221,7 +226,9 @@ class Relation2(scrapy.Spider):
             print('over 1000!')
             Relation2.over1000_lst.append(user_id)
             df_over1000 = pd.DataFrame(data = list(set(Relation2.over1000_lst)), columns = ['data'])
-            df_over1000.to_csv(r'D:\git\local\sd_over1000.csv')
+            ###################################################
+            df_over1000.to_csv(r'D:\git\local\jl_over1000.csv')
+            ###################################################
             return
         # follower_lst 추출
         follower_lst = follower_json['data']['user']['edge_followed_by']['edges']
