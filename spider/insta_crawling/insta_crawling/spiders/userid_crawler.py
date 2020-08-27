@@ -199,13 +199,12 @@ class Relation2(scrapy.Spider):
         yield scrapy.FormRequest(Relation2.login_url, method='POST', formdata = Relation2.login_data, headers=Relation2.header, callback=self.start_epoch)
 
 
-    # epoch마다 다시 로그인 작업 수행
     def start_epoch(self, response):
-        # start_end_lst 초기화
-        Relation2.start_end_lst = []
         # 이번 epoch의 user_id 리스트
         user_id_lst = Relation2.user_id_lst
         for idx in range(len(user_id_lst)):
+            # start_end_lst 각 user마다 초기화
+            Relation2.start_end_lst = []
             user_id = user_id_lst[idx]
             if idx%10 == 1:
                 time.sleep(20)
@@ -274,7 +273,6 @@ class Relation2(scrapy.Spider):
                 Relation2.start_end_lst.append([user_id, follow['node']['id']])
                 if len(Relation2.start_end_lst) >= 200:
                     for start, end in Relation2.start_end_lst:
-                        time.sleep(0.5)
                         yield {
                             'start': start,
                             'end' : end
