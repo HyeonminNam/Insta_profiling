@@ -1,5 +1,6 @@
 # 첫번째 페이지 --> https://www.instagram.com/graphql/query/?query_hash=bfa387b2992c3a52dcbe447467b4b771&variables=%7B%22id%22%3A%221437038730%22%2C%22first%22%3A24%7D
 # 강원도 _hyeon_8
+# test : 1451977165
 import scrapy
 import json
 import time
@@ -10,9 +11,11 @@ import datetime
 class Post_Spider(scrapy.Spider):
     name = "post"
 
-    center_user_name = '_heeyas_day'
-    inner_id = '1437038730'
-
+    # center_user_name = '_heeyas_day'
+    # inner_id = '1437038730'
+    center_user_name = 'dadadajin_'
+    inner_id = '1451977165' # test - 200개 이상 포스트를 가진 user 크롤링(끊기는지 확인)
+    
     def start_requests(self):
         start_urls = 'https://www.instagram.com/graphql/query/?query_hash=bfa387b2992c3a52dcbe447467b4b771&variables=%7B%22id%22%3A%22{}%22%2C%22first%22%3A24%7D'.format(Post_Spider.inner_id)
         
@@ -34,13 +37,16 @@ class Post_Spider(scrapy.Spider):
             post_date = datetime.datetime.fromtimestamp(int(timestamp)).strftime('%Y-%m-%d %H:%M:%S')
             url = 'https://www.instagram.com/p/{}/'.format(shortcode) # post url
 
-            content = node['edge_media_to_caption']['edges'][0]['node']['text'] # post 내용,, #전까지를 text로 보면 될듯,,
+            
             try:
+                content = node['edge_media_to_caption']['edges'][0]['node']['text'] # post 내용,, #전까지를 text로 보면 될듯,,
                 hashtag = re.search('(#.+)', content).group()
+                content = re.sub('(#.+)', '', content) # 포스트 본문에 해시태그 부분 제거
+                content = re.sub('\n', '', content)
             except:
                 hashtag = None
-            content = re.sub('(#.+)', '', content) # 공백제거 처리도 해주면 좋을듯
-            content = re.sub('\n', '', content)
+                content = None
+            
 
             # 사진, 동영상 url(복수일 경우 콤마로 구분)//사진, 동영상 복수처리
             media_url = []
