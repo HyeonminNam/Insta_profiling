@@ -35,9 +35,8 @@ class Comment_Spider_1(scrapy.Spider):
         # shortcode_lst = []
         for edge in edges:
             # shortcode_lst.append(edge['node']['shortcode'])
-            shortcode = edge['node']['shortcode']
-            yield {'shortcode' : shortcode}
-        return
+            Comment_Spider_1.shortcode = edge['node']['shortcode']
+            yield {'shortcode' : Comment_Spider_1.shortcode}
 
 class Comment_Spider_2(scrapy.Spider):
     name = 'comment_02'
@@ -91,7 +90,7 @@ class Comment_Spider_2(scrapy.Spider):
         end_cursor = json.loads(response.text)['data']['shortcode_media']['edge_media_to_parent_comment']['page_info']['end_cursor']
 
         if end_cursor != None:
-            yield scrapy.Request('https://www.instagram.com/graphql/query/?query_hash=bc3296d1ce80a24b1b6e40b1e72903f5&variables={"shortcode":"' + self.shortcode + '","first":12'+',"after":"'+end_cursor+'"}', callback=self.parse)
+            yield scrapy.Request('https://www.instagram.com/graphql/query/?query_hash=bc3296d1ce80a24b1b6e40b1e72903f5&variables={"shortcode":"' + Comment_Spider_1.shortcode + '","first":12'+',"after":"'+end_cursor+'"}', callback=self.parse)
         else:
             self.shortcode_count += 1
 
