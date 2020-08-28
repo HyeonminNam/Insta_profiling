@@ -12,7 +12,7 @@ import json
 import requests
 import datetime
 import pandas as pd
-from IU_SJ_Instagram.items import InstagramCrawlingItem
+from insta_crawling.items import InstagramCrawlingItem
 
 # 필요한 댓글 정보 : inner_id(내구고유ID), reply(댓글 내용), hashtag(해시태그, 복수의 경우 콤마로 구분), reply_time(댓글 달린 시간), shortcode(댓글이 달린 포스트의 shortcode) - 수집 되는 것 확인
 
