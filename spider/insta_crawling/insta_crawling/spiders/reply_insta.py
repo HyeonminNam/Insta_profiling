@@ -29,8 +29,8 @@ class Comment_Spider_1(scrapy.Spider):
 
 
     def comment_shortcode(self, response):
-        graphql = response.json()
-        edges = graphql['data']['user']['edge_owner_to_timeline_media']['edges']
+        Comment_Spider_1.graphql = response.json()
+        edges = Comment_Spider_1.graphql['data']['user']['edge_owner_to_timeline_media']['edges']
 
         # shortcode_lst = []
         for edge in edges:
@@ -87,7 +87,19 @@ class Comment_Spider_2(scrapy.Spider):
                     item['shortcode']= self.shortcode_list[self.shortcode_count]
                     yield item
 
-        end_cursor = json.loads(response.text)['data']['shortcode_media']['edge_media_to_parent_comment']['page_info']['end_cursor']
+        end_cursor = json.loads(response.reply)['data']['shortcode_media']['edge_media_to_parent_comment']['page_info']['end_cursor']
+
+        # try:
+        #     end_cursor = Comment_Spider_1.graphql['data']['shortcode_media']['edge_media_to_parent_comment']['page_info']['end_cursor']
+        #     print('end_cursor :', end_cursor)
+
+        # except:
+        #     end_cursor = None
+        
+        # if end_cursor:
+        #     time.sleep(1)
+        #     next_page = 'https://www.instagram.com/graphql/query/?query_hash=bc3296d1ce80a24b1b6e40b1e72903f5&variables={"shortcode":"' + Comment_Spider_1.shortcode + '","first":36'+',"after":"'+end_cursor+'"}'
+        #     yield scrapy.Request(next_page, callback=self.parse)
 
         if end_cursor != None:
             yield scrapy.Request('https://www.instagram.com/graphql/query/?query_hash=bc3296d1ce80a24b1b6e40b1e72903f5&variables={"shortcode":"' + Comment_Spider_1.shortcode + '","first":12'+',"after":"'+end_cursor+'"}', callback=self.parse)

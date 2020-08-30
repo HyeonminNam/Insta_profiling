@@ -1,6 +1,5 @@
 # 첫번째 페이지 --> https://www.instagram.com/graphql/query/?query_hash=bfa387b2992c3a52dcbe447467b4b771&variables=%7B%22id%22%3A%221437038730%22%2C%22first%22%3A24%7D
-# 강원도 _hyeon_8
-# test : 1451977165
+
 import scrapy
 import json
 import time
@@ -11,10 +10,10 @@ import datetime
 class Post_Spider(scrapy.Spider):
     name = "post"
 
-    # center_user_name = '_heeyas_day'
-    # inner_id = '1437038730'
-    center_user_name = 'dadadajin_'
+    # center_user_name = 'dadadajin_'
+    ###################################################################################
     inner_id = '1451977165' # test - 200개 이상 포스트를 가진 user 크롤링(끊기는지 확인)
+    ###################################################################################
     
     def start_requests(self):
         start_urls = 'https://www.instagram.com/graphql/query/?query_hash=bfa387b2992c3a52dcbe447467b4b771&variables=%7B%22id%22%3A%22{}%22%2C%22first%22%3A24%7D'.format(Post_Spider.inner_id)
@@ -37,7 +36,6 @@ class Post_Spider(scrapy.Spider):
             post_date = datetime.datetime.fromtimestamp(int(timestamp)).strftime('%Y-%m-%d %H:%M:%S')
             url = 'https://www.instagram.com/p/{}/'.format(shortcode) # post url
 
-            
             try:
                 content = node['edge_media_to_caption']['edges'][0]['node']['text'] # post 내용,, #전까지를 text로 보면 될듯,,
                 hashtag = re.search('(#.+)', content).group()
@@ -72,10 +70,8 @@ class Post_Spider(scrapy.Spider):
 
             try:
                 region_tag = node['location']['name']
-                # tagged = node['edge_media_to_tagged_user']['edges'][0]['node']['user']['username'] # 태그된 사람의 인스타 아이디
             except:
                 region_tag = None
-                # tagged = None
 
             like_count = node['edge_media_preview_like']['count']
             crawling_time = time.strftime('%Y-%m-%d %H:%M:%S')
@@ -90,7 +86,6 @@ class Post_Spider(scrapy.Spider):
                     'media_url' : media_url,
                     'hashtag' : hashtag,
                     'region_tag' : region_tag,
-                    # 'tagged' : tagged,
                     'like_count' : like_count,
                     'view_count' : view_count,
                     'crawling_time' : crawling_time,
