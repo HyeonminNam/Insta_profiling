@@ -14,7 +14,7 @@ NEWSPIDER_MODULE = 'insta_crawling.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36"
+# USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -25,7 +25,9 @@ ROBOTSTXT_OBEY = False
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 3
+# 다운로드 딜레이
+DOWNLOAD_DELAY = 1
+
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -54,6 +56,13 @@ COOKIES_ENABLED = True
 #DOWNLOADER_MIDDLEWARES = {
 #    'insta_crawling.middlewares.InstaCrawlingDownloaderMiddleware': 543,
 #}
+
+# Too many request 시에 다시 시도하는 Middlewares
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy.downloadermiddlewares.retry.RetryMiddleware': None,
+    'insta_crawling.middlewares.TooManyRequestsRetryMiddleware': 543,
+}
+
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -90,3 +99,6 @@ COOKIES_ENABLED = True
 
 # 같은 주소 다시 request할 수 있도록 하는 옵션
 DUPEFILTER_CLASS = 'scrapy.dupefilters.BaseDupeFilter'
+
+# 429 에러뜨면 다시 시도하는 옵션
+RETRY_HTTP_CODES = [429]
