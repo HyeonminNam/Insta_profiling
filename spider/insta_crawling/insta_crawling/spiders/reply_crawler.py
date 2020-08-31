@@ -5,17 +5,18 @@ import re
 import datetime
 import pandas as pd
 
-# csv파일 경로 설정 및 숏코드 컬럼명 설정
-# ====================================================================
-shortcode_data = pd.read_csv('/Users/gyumyung/Documents/post_id.csv')
-shortcode_list = shortcode_data['shortcode'].tolist()
-# ====================================================================
 
 class Reply_Spider(scrapy.Spider):
     name = "reply"
 
+    # csv파일 경로 설정 및 숏코드 컬럼명 설정
+    # ====================================================================
+    shortcode_data = pd.read_csv('/Users/gyumyung/Documents/post_id.csv')
+    shortcode_list = shortcode_data['shortcode'].tolist()
+    # ====================================================================
+
     def start_requests(self):
-        for shortcode in shortcode_list:
+        for shortcode in Reply_Spider.shortcode_list:
             start_urls = 'https://www.instagram.com/graphql/query/?query_hash=bc3296d1ce80a24b1b6e40b1e72903f5&variables=%7B%22shortcode%22%3A%22{}%22%2C%22first%22%3A12%7D'.format(shortcode)   
             yield scrapy.Request(url=start_urls, callback=self.get_reply)
 
