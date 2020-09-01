@@ -5,6 +5,8 @@ import json
 import time
 import re
 import datetime
+import pandas as pd
+import numpy as np
 
 #### 로그인 과정은 필요없고, start_url에 center_id만 넣어주면 해당 id의 모든 post정보 크롤링 가능 ####
 class Post_Spider(scrapy.Spider):
@@ -128,7 +130,7 @@ class Region_Spider(scrapy.Spider):
             url = 'https://www.instagram.com/graphql/query/?query_hash=bfa387b2992c3a52dcbe447467b4b771&variables=%7B%22id%22%3A%22{}%22%2C%22first%22%3A24%7D'.format(user_id)
             timer = round((time.time() - self.starttime)/60)
             percentage = round(self.request_count/len(self.user_id_lst)*100, 2) 
-            print('{}분 경과, {}개 중 {}개 request 완료({}%)'.format(timer, self.request_count, len(self.user_id_lst), percentage))
+            print('{}분 경과, {}개 중 {}개 request 완료({}%)'.format(timer, len(self.user_id_lst), self.request_count, percentage))
             yield scrapy.Request(url, callback=self.region, meta={'user_id': user_id})
 
 
