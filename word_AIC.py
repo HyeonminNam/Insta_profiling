@@ -56,6 +56,33 @@ class feature_vector():
             E_t = AIC_dm - AIC_im - 2
         return E_t
 
+    
+    def get_feature_vec(self, key_terms, D_p, D_n):
+        feature_vec = []
+        feature_vec_label = []
+
+        for p in D_p:
+            tmp = []
+            for t in key_terms:
+                if t in p:
+                    tmp.append(1)
+                else:
+                    tmp.append(0)
+            feature_vec.append(tmp)
+            feature_vec_label.append(1)
+
+        for n in D_n:
+            tmp = []
+            for t in key_terms:
+                if t in n:
+                    tmp.append(1)
+                else:
+                    tmp.append(0)
+            feature_vec.append(tmp)
+            feature_vec_label.append(0)
+
+        return feature_vec, feature_vec_label
+
 
 if __name__ == "__main__":
     D_p = ['서울 너무 좋아 짱짱']
@@ -65,3 +92,7 @@ if __name__ == "__main__":
     print(fv.evaluation('부산', D_p, D_n))
     print(fv.evaluation('광주', D_p, D_n))
     print(fv.evaluation('짱짱', D_p, D_n))
+
+    vec, vec_label = fv.get_feature_vec(['서울', '부산', '광주', '너무'], D_p, D_n)
+    print(vec)
+    print(vec_label)
