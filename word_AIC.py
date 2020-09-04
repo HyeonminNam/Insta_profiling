@@ -71,11 +71,13 @@ class feature_vector():
         term_lst = list(set(term_lst))
         return term_lst
 
-    def key_terms(self, D_p, D_n, evaluation_threshold = 0):
+    def key_terms(self, D_p, D_n, evaluation_threshold = 2000):
         D = D_p + D_n
         term_lst = self._term_lst(D)
-        keyterms_dic = {t:round(self.evaluation(t, D_p, D_n), 5) for t in term_lst if self.evaluation(t, D_p, D_n) > evaluation_threshold}
-        return keyterms_dic
+        eval_dic = {t:round(self.evaluation(t, D_p, D_n), 5) for t in term_lst}
+        eval_sort = sorted(eval_dic.items(), key=lambda x:x[1], reverse=True)
+        key_terms = dict(eval_sort[:evaluation_threshold])
+        return key_terms
         
 
     def get_feature_vec(self, key_terms, D_p, D_n):
@@ -118,7 +120,8 @@ if __name__ == "__main__":
     print(fv.evaluation('광주', D_p, D_n))
     print(fv.evaluation('짱짱', D_p, D_n))
 
-    key_terms = fv.key_terms(D_p, D_n, evaluation_threshold=0)
+    # keyterms 5개까지 뽑음
+    key_terms = fv.key_terms(D_p, D_n, evaluation_threshold=5)
     print(key_terms)
 
     vec, vec_label = fv.get_feature_vec(key_terms, D_p, D_n)
