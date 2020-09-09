@@ -1,11 +1,16 @@
 import math
 from nltk.tokenize import RegexpTokenizer
+from chatspace import ChatSpace
+from konlpy.tag import Mecab
 
 
 class feature_vector():
 
     def __init__(self):
-        pass
+        self.spacer = ChatSpace()
+        self.retokenize = RegexpTokenizer("[가-힣ㄱ-ㅎㅏ-ㅣ]+")
+        self.retokenize_hash = RegexpTokenizer("#[가-힣ㄱ-ㅎㅏ-ㅣ]+")
+        self.mecab = Mecab()
 
 
     def _AIC(self, max_like, free_param_num):
@@ -58,17 +63,29 @@ class feature_vector():
         return E_t
     
 
-    # 추후 인스타그램에 맞게 tokenizer 수정 필요함
+    # 한글만 남겨둔 뒤에, 띄어쓰기 교정 후에, mecab 통해서 tokenize
     def _tokenizer(self, doc):
-        retokenize = RegexpTokenizer("[\w]+")
-        token_lst = retokenize.tokenize(doc)
+        text = ' '.join(self.retokenize.tokenize(doc))
+        text = self.spacer.space(text)
+        token_lst = self.mecab.morphs(text)
+        return token_lst
+
+    # 해쉬태그용 tokenize 함수
+    def _hashtag_tokenizer(self, doc):
+        text = ' '.join([h[1:] for h in self.retokenize_hash.tokenize(doc)])
+        text = self.spacer.space(text)
+        token_lst = self.mecab.morphs(text)
         return token_lst
 
     def _term_lst(self, D):
         term_lst = []
         for doc in D:
-            term_lst += self._tokenizer(doc)
+            if '#' in doc:
+                term_lst += self._hashtag_tokenizer(doc)
+            else:
+                term_lst += self._tokenizer(doc)
         term_lst = list(set(term_lst))
+        print(term_lst)
         return term_lst
 
     def key_terms(self, D_p, D_n, evaluation_threshold = 2000):
@@ -108,7 +125,7 @@ class feature_vector():
 
 
 if __name__ == "__main__":
-    D_p = ['서울 너무 좋아 짱짱', '서울 광진구 너무 좋아 짱짱', '경기도 너무 좋아 짱짱']
+    D_p = ['서울 너무 좋아 짱짱', '서울 광진구 너무 좋아 짱짱', '#경기도 #너무 #좋아 #짱짱', '경기도가 최고']
     D_n = ['부산 너무 좋아 짱짱', '광주 너무 좋아 짱짱', '강릉 너무 좋아 짱짱', '대전 너무 좋아 짱짱', '충청도 대전 좋아']
 
     fv = feature_vector()
