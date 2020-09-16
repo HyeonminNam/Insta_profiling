@@ -2,15 +2,17 @@ import math
 from nltk.tokenize import RegexpTokenizer
 from chatspace import ChatSpace
 from konlpy.tag import Mecab
+from tc_tagger.TC_tagger import Tagger
 
 
-class feature_vector():
+class feature_vector:
 
-    def __init__(self):
+    def __init__(self, tokenizer = 'tc'):
         self.spacer = ChatSpace()
-        self.retokenize = RegexpTokenizer("[가-힣ㄱ-ㅎㅏ-ㅣ]+")
-        self.retokenize_hash = RegexpTokenizer("#[가-힣ㄱ-ㅎㅏ-ㅣ]+")
         self.mecab = Mecab()
+        self.tc_tagger = Tagger()
+        self.tokenizer = tokenizer
+        
 
 
     def _AIC(self, max_like, free_param_num):
@@ -79,11 +81,13 @@ class feature_vector():
 
     def _term_lst(self, D):
         term_lst = []
+        print(self.tokenizer)
         for doc in D:
-            if '#' in doc:
-                term_lst += self._hashtag_tokenizer(doc)
+            text = self.spacer.space(doc)
+            if self.tokenizer == 'tc':
+                term_lst += self.tc_tagger.tokenizer(text)
             else:
-                term_lst += self._tokenizer(doc)
+                term_lst += self.mecab.morphs(text)
         term_lst = list(set(term_lst))
         print(term_lst)
         return term_lst
@@ -128,7 +132,8 @@ if __name__ == "__main__":
     D_p = ['서울 너무 좋아 짱짱', '서울 광진구 너무 좋아 짱짱', '#경기도 #너무 #좋아 #짱짱', '경기도가 최고']
     D_n = ['부산 너무 좋아 짱짱', '광주 너무 좋아 짱짱', '강릉 너무 좋아 짱짱', '대전 너무 좋아 짱짱', '충청도 대전 좋아']
 
-    fv = feature_vector()
+    tagger = Tagger()
+    fv = feature_vector(tokenizer = 'mc') # 'mc'이면 mecab
 
     print(fv.evaluation('서울', D_p, D_n))
     print(fv.evaluation('광진구', D_p, D_n))
