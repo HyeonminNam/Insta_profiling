@@ -104,10 +104,12 @@ class feature_vector:
     def get_feature_vec(self, key_terms, D_p, D_n):
         feature_vec = []
         feature_vec_label = []
+        key_terms_lst = key_terms.keys()
+        feature_dic = {idx:t for idx, t in enumerate(key_terms_lst)}
 
         for p in D_p:
             tmp = []
-            for t in key_terms:
+            for t in key_terms_lst:
                 if t in p:
                     tmp.append(1)
                 else:
@@ -117,7 +119,7 @@ class feature_vector:
 
         for n in D_n:
             tmp = []
-            for t in key_terms:
+            for t in key_terms_lst:
                 if t in n:
                     tmp.append(1)
                 else:
@@ -125,7 +127,7 @@ class feature_vector:
             feature_vec.append(tmp)
             feature_vec_label.append(0)
 
-        return feature_vec, feature_vec_label
+        return feature_dic, feature_vec, feature_vec_label
 
 
 if __name__ == "__main__":
@@ -146,6 +148,7 @@ if __name__ == "__main__":
     key_terms = fv.key_terms(D_p, D_n, evaluation_threshold=5)
     print(key_terms)
 
-    vec, vec_label = fv.get_feature_vec(key_terms, D_p, D_n)
+    feature_dic, vec, vec_label = fv.get_feature_vec(key_terms, D_p, D_n)
+    print(feature_dic)
     print(vec)
     print(vec_label)
