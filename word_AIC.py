@@ -3,6 +3,8 @@ from nltk.tokenize import RegexpTokenizer
 from chatspace import ChatSpace
 from konlpy.tag import Mecab
 from tc_tagger.TC_tagger import Tagger
+import pandas as pd
+import os
 
 
 class feature_vector:
@@ -12,6 +14,7 @@ class feature_vector:
         self.mecab = Mecab()
         self.tc_tagger = Tagger()
         self.tokenizer = tokenizer
+        self.retokenize = RegexpTokenizer("[가-힣ㄱ-ㅎㅏ-ㅣ]+")
         
 
 
@@ -80,16 +83,16 @@ class feature_vector:
         return token_lst
 
     def _term_lst(self, D):
-        term_lst = []
-        print(self.tokenizer)
-        for doc in D:
-            text = self.spacer.space(doc)
+        tmp = []
+        print('tokenizer: '+self.tokenizer)
+        for text in D:
+            # text = self.spacer.space(text)
             if self.tokenizer == 'tc':
-                term_lst += self.tc_tagger.tokenizer(text)
+                tmp.extend(self.tc_tagger.tokenizer(text))
             else:
-                term_lst += self.mecab.morphs(text)
-        term_lst = list(set(term_lst))
-        print(term_lst)
+                text = ' '.join([x for x in self.retokenize.tokenize(text)])
+                tmp.extend(self.mecab.morphs(text))
+        term_lst = list(set(tmp))
         return term_lst
 
     def key_terms(self, D_p, D_n, evaluation_threshold = 2000):
@@ -131,24 +134,35 @@ class feature_vector:
 
 
 if __name__ == "__main__":
-    D_p = ['서울 너무 좋아 짱짱', '서울 광진구 너무 좋아 짱짱', '#경기도 #너무 #좋아 #짱짱', '경기도가 최고']
-    D_n = ['부산 너무 좋아 짱짱', '광주 너무 좋아 짱짱', '강릉 너무 좋아 짱짱', '대전 너무 좋아 짱짱', '충청도 대전 좋아']
+    root = r'D:\local\insta_profiling\content_labeled'
+    content_lst = os.listdir(root)
+    cc = pd.read_csv(root+'\\'+content_lst[0])
+    gs = pd.read_csv(root+'\\'+content_lst[1])
+    gw = pd.read_csv(root+'\\'+content_lst[2])
+    jl = pd.read_csv(root+'\\'+content_lst[3])
+    sd = pd.read_csv(root+'\\'+content_lst[4])
+    df_lst = [cc, gs, gw, jl, sd]
+    region_lst = ['cc', 'gs', 'gw', 'jl', 'sd']
+    tokenizer = 'tc'
 
-    tagger = Tagger()
-    fv = feature_vector(tokenizer = 'mc') # 'mc'이면 mecab
+    for idx in range(len(df_lst)):
+        D_p = list(df_lst[idx]['content'])
+        D_n = []
+        for other in range(len(df_lst)):
+            if other == idx:
+                pass
+            else:
+                D_n.extend(list(df_lst[other]['content']))
+        
+        fv = feature_vector(tokenizer = tokenizer) # 'mc'이면 mecab
 
-    print(fv.evaluation('서울', D_p, D_n))
-    print(fv.evaluation('광진구', D_p, D_n))
-    print(fv.evaluation('경기도', D_p, D_n))
-    print(fv.evaluation('부산', D_p, D_n))
-    print(fv.evaluation('광주', D_p, D_n))
-    print(fv.evaluation('짱짱', D_p, D_n))
+        # keyterms 2000개
+        key_terms = fv.key_terms(D_p, D_n, evaluation_threshold=2000)
+        print(region_lst[idx])
+        print(list(key_terms.keys())[:100])
 
-    # keyterms 5개까지 뽑음
-    key_terms = fv.key_terms(D_p, D_n, evaluation_threshold=5)
-    print(key_terms)
+        feature_dic, vec, vec_label = fv.get_feature_vec(key_terms, D_p, D_n)
 
-    feature_dic, vec, vec_label = fv.get_feature_vec(key_terms, D_p, D_n)
-    print(feature_dic)
-    print(vec)
-    print(vec_label)
+        df = pd.DataFrame(columns = list(feature_dic.values()), data = vec)
+        df['label'] = vec_label
+        df.to_csv(tokenizer+region_lst[idx]+'_fv.csv', index=False)
