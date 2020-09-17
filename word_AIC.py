@@ -14,7 +14,7 @@ class feature_vector:
         self.mecab = Mecab()
         self.tc_tagger = Tagger()
         self.tokenizer = tokenizer
-        self.retokenize = RegexpTokenizer("[가-힣ㄱ-ㅎㅏ-ㅣ]+")
+        self.retokenize = RegexpTokenizer("[\w]+")
         
 
 
@@ -104,14 +104,15 @@ class feature_vector:
         return key_terms
         
 
-    def get_feature_vec(self, key_terms, D_p, D_n):
+    def get_feature_vec(self, key_terms, D_p, D_n, D_p_id, D_n_id):
         feature_vec = []
         feature_vec_label = []
         key_terms_lst = key_terms.keys()
         feature_dic = {idx:t for idx, t in enumerate(key_terms_lst)}
 
-        for p in D_p:
+        for p, p_id in zip(D_p, D_p_id):
             tmp = []
+            tmp.append(p_id)
             for t in key_terms_lst:
                 if t in p:
                     tmp.append(1)
@@ -120,8 +121,9 @@ class feature_vector:
             feature_vec.append(tmp)
             feature_vec_label.append(1)
 
-        for n in D_n:
+        for n, n_id in zip(D_n, D_n_id):
             tmp = []
+            tmp.append(n_id)
             for t in key_terms_lst:
                 if t in n:
                     tmp.append(1)
@@ -143,26 +145,30 @@ if __name__ == "__main__":
     sd = pd.read_csv(root+'\\'+content_lst[4])
     df_lst = [cc, gs, gw, jl, sd]
     region_lst = ['cc', 'gs', 'gw', 'jl', 'sd']
-    tokenizer = 'tc'
+    tokenizer = 'mc'  # 'mc'이면 mecab
 
     for idx in range(len(df_lst)):
         D_p = list(df_lst[idx]['content'])
+        D_p_id = list(df_lst[idx]['inner_id'])
         D_n = []
+        D_n_id = []
+
         for other in range(len(df_lst)):
             if other == idx:
                 pass
             else:
                 D_n.extend(list(df_lst[other]['content']))
+                D_n_id.extend(list(df_lst[other]['inner_id']))
         
-        fv = feature_vector(tokenizer = tokenizer) # 'mc'이면 mecab
+        fv = feature_vector(tokenizer = tokenizer)
 
         # keyterms 2000개
         key_terms = fv.key_terms(D_p, D_n, evaluation_threshold=2000)
         print(region_lst[idx])
         print(list(key_terms.keys())[:100])
 
-        feature_dic, vec, vec_label = fv.get_feature_vec(key_terms, D_p, D_n)
+        feature_dic, vec, vec_label = fv.get_feature_vec(key_terms, D_p, D_n, D_p_id, D_n_id)
 
-        df = pd.DataFrame(columns = list(feature_dic.values()), data = vec)
+        df = pd.DataFrame(columns = ['inner_id'] + list(feature_dic.values()), data = vec)
         df['label'] = vec_label
         df.to_csv(tokenizer+region_lst[idx]+'_fv.csv', index=False)
